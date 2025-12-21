@@ -114,19 +114,19 @@ func (s *CleaningLogService) CreateFullLog(input model.CreateFullLogInput, fileB
     return log, nil
 }
 
-func (s *CleaningLogService) GetFormOptions() (map[string]interface{}, error) {
-	locTypes, err := s.Repo.GetAllLocationTypes()
-	if err != nil {
-		return nil, err
-	}
+func (s *CleaningLogService) GetFormOptions(siteID int) (map[string]interface{}, error) {
+    locTypes, err := s.Repo.GetLocationTypesBySite(siteID)
+    if err != nil {
+        return nil, err
+    }
 
-	locations, err := s.Repo.GetAllLocations()
-	if err != nil {
-		return nil, err
-	}
+    locations, err := s.Repo.GetLocationsBySite(siteID)
+    if err != nil {
+        return nil, err
+    }
 
-	return map[string]interface{}{
-		"location_types": locTypes,
-		"locations":      locations,
-	}, nil
+    return map[string]interface{}{
+        "location_types": locTypes,
+        "locations":      locations,
+    }, nil
 }

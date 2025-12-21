@@ -33,12 +33,14 @@ type CreateFullLogInput struct {
 type LocationType struct {
 	LocationTypeID int    `json:"location_type_id"`
 	TypeName       string `json:"type_name"`
+	SiteId       int `json:"site_id"`
 }
 
 type Location struct {
 	LocationID     int    `json:"location_id"`
 	LocationName   string `json:"location_name"`
 	LocationTypeID int    `json:"location_type_id"`
+	SiteID int    `json:"site_id"`
 }
 
 type PaginationMeta struct {

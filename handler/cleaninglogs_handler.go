@@ -1,8 +1,9 @@
-package handlers
+package handler
 
 import (
 	"HRD/internal/service"
 	"HRD/model"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -48,9 +49,12 @@ func (h *CleaningLogHandler) CreateFullLog(c echo.Context) error {
     notes := c.FormValue("notes")
     startTimeStr := c.FormValue("start_time")
     endTimeStr := c.FormValue("end_time")
+    fmt.Println(cleanerName)
+    fmt.Println(locationID)
+    fmt.Println(locationTypeID)
 
     if cleanerName == "" || locationID == 0 || locationTypeID == 0 {
-        return c.JSON(http.StatusBadRequest, echo.Map{"error": "data tidak lengkap"})
+        return c.JSON(http.StatusBadRequest, echo.Map{"error": "Data Kosong"})
     }
 
     fileBefore, errBefore := c.FormFile("image_before")
@@ -77,10 +81,21 @@ func (h *CleaningLogHandler) CreateFullLog(c echo.Context) error {
     return c.JSON(http.StatusCreated, echo.Map{"data": createdLog})
 }
 
-func (h *CleaningLogHandler) GetFormOptions(c echo.Context) error {
-	options, err := h.Service.GetFormOptions()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
-	}
-	return c.JSON(http.StatusOK, echo.Map{"data": options})
+func (h *CleaningLogHandler) GetFormOptionsHandler(c echo.Context) error {
+    // 1. Ambil site_id dari URL (?site_id=1)
+    siteIDParam := c.QueryParam("site_id")
+    siteID, err := strconv.Atoi(siteIDParam)
+    
+    // Validasi sederhana jika site_id tidak valid atau kosong
+    if err != nil || siteID == 0 {
+        return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid or missing site_id"})
+    }
+
+    // 2. Panggil Service dengan siteID
+    options, err := h.Service.GetFormOptions(siteID)
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+    }
+
+    return c.JSON(http.StatusOK, options)
 }
