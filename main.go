@@ -34,6 +34,10 @@ func main() {
     dashboardService := service.NewDashboardService(dashboardRepository)
     dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 
+        KendaraanRepository := repository.NewKendaraanRepository(db)
+    KendaraanService := service.NewKendaraanService(KendaraanRepository)
+    KendaraanHandler := handlers.NewKendaraanHandler(KendaraanService)
+
 	locRepo := repository.NewLocationRepository(db)
 	locService := service.NewLocationService(locRepo)
 	locHandler := handler.NewLocationHandler(locService)
@@ -77,6 +81,9 @@ func main() {
 	protected.POST("/locations", locHandler.CreateLocation)
 	protected.PUT("/locations/:id", locHandler.UpdateLocation)
 	protected.DELETE("/locations/:id", locHandler.DeleteLocation)
+
+    protected.POST("/kendaraan", KendaraanHandler.Create)
+    protected.GET("/kendaraan", KendaraanHandler.GetAll)
 
     e.Logger.Fatal(e.Start(":8081"))
 }

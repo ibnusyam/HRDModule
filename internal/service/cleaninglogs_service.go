@@ -53,31 +53,50 @@ func (s *CleaningLogService) GetAllCleaningsLogs(siteID, locationID, typeID, pag
 }
 
 func saveFile(fileHeader *multipart.FileHeader, prefix string) (string, error) {
-	uploadDir := "uploads"
-	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-		os.Mkdir(uploadDir, os.ModePerm)
-	}
+    uploadDir := filepath.Join("uploads", "cleaning")
 
-	src, err := fileHeader.Open()
-	if err != nil {
-		return "", err
-	}
-	defer src.Close()
+    if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
+        if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
+            return "", err
+        }
+    }
 
-	filename := fmt.Sprintf("%s_%d_%s", prefix, time.Now().Unix(), fileHeader.Filename)
-	path := filepath.Join(uploadDir, filename)
+    src, err := fileHeader.Open()
+    if err != nil {
+        return "", err
+    }
+    defer src.Close()
 
-	dst, err := os.Create(path)
-	if err != nil {
-		return "", err
-	}
-	defer dst.Close()
+    ext := filepath.Ext(fileHeader.Filename)
 
-	if _, err = io.Copy(dst, src); err != nil {
-		return "", err
-	}
+    if ext == "" || ext == ".blob" {
+        contentType := fileHeader.Header.Get("Content-Type")
+        switch contentType {
+        case "image/jpeg":
+            ext = ".jpg"
+        case "image/png":
+            ext = ".png"
+        case "image/webp":
+            ext = ".webp"
+        default:
+            ext = ".jpg" 
+        }
+    }
 
-	return path, nil
+    filename := fmt.Sprintf("%s_%d%s", prefix, time.Now().Unix(), ext)
+    path := filepath.Join(uploadDir, filename)
+
+    dst, err := os.Create(path)
+    if err != nil {
+        return "", err
+    }
+    defer dst.Close()
+
+    if _, err = io.Copy(dst, src); err != nil {
+        return "", err
+    }
+
+    return path, nil
 }
 
 func (s *CleaningLogService) CreateFullLog(input model.CreateFullLogInput, fileBefore, fileAfter *multipart.FileHeader) (*model.CleaningLog, error) {
