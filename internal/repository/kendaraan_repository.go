@@ -16,26 +16,26 @@ func NewKendaraanRepository(db *sql.DB) *KendaraanRepository {
 
 func (r *KendaraanRepository) Save(k *model.Kendaraan) error {
     query := `
-        INSERT INTO kendaraan (nama_pengemudi, model_mobil, lokasi_sekarang, bbm ,gambar_url)
+        INSERT INTO kendaraan (nama_pengemudi, model_mobil, lokasi_sekarang, bbm, gambar_url)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING id
+        RETURNING id, waktu_input
     `
-    // Pakai QueryRow biasa (tanpa Context)
+    // Scan id DAN waktu_input yang digenerate oleh database
     err := r.db.QueryRow(query, 
         k.NamaPengemudi, 
         k.ModelMobil, 
         k.LokasiSekarang, 
         k.Bbm, 
         k.GambarURL,
-    ).Scan(&k.ID)
+    ).Scan(&k.ID, &k.WaktuInput)
 
     return err
 }
 
 func (r *KendaraanRepository) FindAll() ([]model.Kendaraan, error) {
-    query := `SELECT id, nama_pengemudi, model_mobil, lokasi_sekarang, bbm, gambar_url FROM kendaraan ORDER BY id DESC`
+    // Tambahkan waktu_input dalam SELECT
+    query := `SELECT id, nama_pengemudi, model_mobil, lokasi_sekarang, bbm, gambar_url, waktu_input FROM kendaraan ORDER BY id DESC`
     
-    // Pakai Query biasa (tanpa Context)
     rows, err := r.db.Query(query)
     if err != nil {
         return nil, err
@@ -45,7 +45,8 @@ func (r *KendaraanRepository) FindAll() ([]model.Kendaraan, error) {
     var results []model.Kendaraan
     for rows.Next() {
         var k model.Kendaraan
-        if err := rows.Scan(&k.ID, &k.NamaPengemudi, &k.ModelMobil, &k.LokasiSekarang, &k.Bbm, &k.GambarURL); err != nil {
+        // Scan field waktu_input
+        if err := rows.Scan(&k.ID, &k.NamaPengemudi, &k.ModelMobil, &k.LokasiSekarang, &k.Bbm, &k.GambarURL, &k.WaktuInput); err != nil {
             return nil, err
         }
         results = append(results, k)
