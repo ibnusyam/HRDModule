@@ -93,6 +93,7 @@ func (repo *CleaningLogsRepository) GetAllCleaningsLogs(siteID, locationID, type
 }
 
 func (repo *CleaningLogsRepository) CreateFullLog(log *model.CleaningLog) error {
+    fmt.Println(log)
 	query := `
         INSERT INTO cleaning_logs (
             cleaner_name, location_id, location_type_id, 

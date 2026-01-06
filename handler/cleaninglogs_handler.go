@@ -52,6 +52,8 @@ func (h *CleaningLogHandler) CreateFullLog(c echo.Context) error {
     fmt.Println(cleanerName)
     fmt.Println(locationID)
     fmt.Println(locationTypeID)
+    fmt.Println(startTimeStr)
+    fmt.Println(endTimeStr)
 
     if cleanerName == "" || locationID == 0 || locationTypeID == 0 {
         return c.JSON(http.StatusBadRequest, echo.Map{"error": "Data Kosong"})

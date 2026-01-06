@@ -101,8 +101,23 @@ func saveFile(fileHeader *multipart.FileHeader, prefix string) (string, error) {
 
 func (s *CleaningLogService) CreateFullLog(input model.CreateFullLogInput, fileBefore, fileAfter *multipart.FileHeader) (*model.CleaningLog, error) {
     layout := "2006-01-02 15:04:05"
-    startTime, _ := time.Parse(layout, input.StartTimeStr)
-    endTime, _ := time.Parse(layout, input.EndTimeStr)
+    loc, err := time.LoadLocation("Asia/Jakarta")
+    if err != nil {
+        loc = time.Local 
+    }
+
+    startTime, err := time.ParseInLocation(layout, input.StartTimeStr, loc)
+    if err != nil {
+        return nil, fmt.Errorf("invalid start time format: %v", err)
+    }
+
+    endTime, err := time.ParseInLocation(layout, input.EndTimeStr, loc)
+    if err != nil {
+        return nil, fmt.Errorf("invalid end time format: %v", err)
+    }
+
+    fmt.Println(startTime)
+    fmt.Println(endTime)
 
     pathBefore, err := saveFile(fileBefore, "before")
     if err != nil { return nil, err }

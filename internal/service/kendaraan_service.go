@@ -36,7 +36,28 @@ func (s *KendaraanService) CreateKendaraan(input model.Kendaraan, file *multipar
 }
 
 func (s *KendaraanService) GetAllKendaraan() ([]model.Kendaraan, error) {
-    return s.repo.FindAll()
+    data, err := s.repo.FindAll()
+    if err != nil {
+        return nil, err
+    }
+
+    loc, _ := time.LoadLocation("Asia/Jakarta")
+
+    for i := range data {
+        t := data[i].WaktuInput
+
+        // 1️⃣ Anggap waktu ini adalah WIB
+        tWIB := time.Date(
+            t.Year(), t.Month(), t.Day(),
+            t.Hour(), t.Minute(), t.Second(), t.Nanosecond(),
+            loc,
+        )
+
+        // 2️⃣ Konversi ke UTC (INI BARU BENAR)
+        data[i].WaktuInput = tWIB.UTC()
+    }
+
+    return data, nil
 }
 
 // --- Helper Simpan File (Logic Anti-Blob) ---
